@@ -180,7 +180,7 @@ export default function PublicFoodRequestPage() {
                     color: '#92400e'
                   }}
                 >
-                  PENDING MATCH & DISPATCH
+                  PENDING REVIEW
                 </span>
               </div>
             </div>
@@ -199,9 +199,9 @@ export default function PublicFoodRequestPage() {
               <Button
                 variant="primary"
                 style={{ flex: 1 }}
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/')}
               >
-                Go to Portal Login
+                Return to Home
               </Button>
             </div>
           </Card>
@@ -217,12 +217,12 @@ export default function PublicFoodRequestPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <button
             type="button"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/')}
             className="btn btn-outline btn-sm"
             style={{ border: 'none', paddingLeft: 0 }}
           >
             <ArrowLeft size={16} />
-            <span>Return to Login</span>
+            <span>Return to Home</span>
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -252,7 +252,7 @@ export default function PublicFoodRequestPage() {
             Request Surplus Food Assistance
           </h1>
           <p style={{ fontSize: '0.9375rem', color: 'var(--slate-500)', marginTop: '0.25rem', maxWidth: '580px', margin: '0.25rem auto 0 auto' }}>
-            Directly connect your shelter, family center, or group home with safe, high-quality surplus meals from local certified donors.
+            NGOs, community groups and individuals can request food here without signing in. Requests are reviewed, and submitting one does not guarantee food or delivery.
           </p>
         </div>
 
@@ -532,7 +532,7 @@ export default function PublicFoodRequestPage() {
                   style={{ width: '100%', padding: '0.85rem' }}
                   data-testid="submit-food-request-btn"
                 >
-                  {submitting ? 'Broadcasting Request...' : 'Submit Food Rescue Request'}
+                  {submitting ? 'Submitting Request...' : 'Submit Food Request'}
                 </Button>
               </Card>
             </div>
