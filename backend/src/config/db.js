@@ -10,8 +10,7 @@ export async function connectDB(customUri = null) {
 
   const uri = customUri || ENV.MONGODB_URI;
 
-  // Mask credentials in log if present
-  const safeUri = uri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
+  // Never include a connection URI in logs: passwords may contain @ or other delimiters.
 
   try {
     const conn = await mongoose.connect(uri, {
@@ -24,7 +23,7 @@ export async function connectDB(customUri = null) {
     return conn;
   } catch (error) {
     isConnected = false;
-    console.error(`[MongoDB] Connection failed to ${safeUri}: ${error.message}`);
+    console.error(`[MongoDB] Connection failed: ${error.message}`);
     throw new Error('Database connection failed. Please ensure MongoDB is running.');
   }
 }
