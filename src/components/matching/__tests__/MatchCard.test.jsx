@@ -20,6 +20,8 @@ describe('MatchCard Component - Deterministic Display & AI Match Explanation', (
     capacityCompatibility: 'Fits 40 meals buffer',
     foodCompatibility: 'High priority accepted',
     urgency: 'High Urgency',
+    donationCoordinates: [-122.4194, 37.7749],
+    shelterCoordinates: [-122.4150, 37.7780],
     reasons: [
       'Within 2-mile priority radius',
       'Matches available refrigerated space',

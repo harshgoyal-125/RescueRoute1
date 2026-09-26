@@ -76,8 +76,12 @@ export default function MatchCard({
       const data = response?.data || response;
       setExplanation(data);
     } catch (err) {
-      setExplanation(null);
-      setExplainError(err.message || 'AI explanation unavailable.');
+      setExplanation({
+        summary: 'AI explanation unavailable. Showing deterministic match reasons.',
+        reasons,
+        isFallback: true
+      });
+      setExplainError('');
     } finally {
       setIsExplaining(false);
     }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mockBackend, testShelter } from '../../../test/liveApiFixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
@@ -16,11 +17,15 @@ function renderWithProviders(ui) {
   );
 }
 
+beforeEach(() => { localStorage.setItem('rescueroute_token', 'test-token'); mockBackend({ user: testShelter }); });
+afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
+
 describe('ShelterCapacityPage', () => {
   it('allows updating capacity numbers and saves to state', async () => {
     renderWithProviders(<ShelterCapacityPage />);
 
     const currentCapInput = screen.getByLabelText(/Current Filled Capacity/i);
+    await screen.findByDisplayValue('100');
     expect(currentCapInput).toBeInTheDocument();
 
     await userEvent.clear(currentCapInput);

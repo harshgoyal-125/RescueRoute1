@@ -1,5 +1,6 @@
 import React from 'react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mockBackend, testDriver, testShelter } from '../test/liveApiFixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -25,7 +26,9 @@ function renderAppAtRoute(initialPath = '/') {
 describe('Role Navigation and Route Handling', () => {
   beforeEach(() => {
     localStorage.clear();
+    mockBackend();
   });
+  afterEach(() => vi.restoreAllMocks());
 
   it('shows the public home page with food request and account links', () => {
     renderAppAtRoute('/');
@@ -57,12 +60,8 @@ describe('Role Navigation and Route Handling', () => {
   });
 
   it('allows authenticated registered driver to access driver portal', async () => {
-    const driverUser = {
-      id: 'real-driver-1',
-      name: 'Registered Driver',
-      email: 'driver@volunteer.org',
-      role: 'DRIVER'
-    };
+    const driverUser = testDriver;
+    mockBackend({ user: driverUser });
     localStorage.setItem('rescueroute_user', JSON.stringify(driverUser));
     localStorage.setItem('rescueroute_token', 'valid-jwt-token');
 
@@ -71,12 +70,8 @@ describe('Role Navigation and Route Handling', () => {
   });
 
   it('allows authenticated registered shelter to access shelter portal', async () => {
-    const shelterUser = {
-      id: 'real-shelter-1',
-      name: 'Registered Shelter',
-      email: 'shelter@charity.org',
-      role: 'SHELTER'
-    };
+    const shelterUser = testShelter;
+    mockBackend({ user: shelterUser });
     localStorage.setItem('rescueroute_user', JSON.stringify(shelterUser));
     localStorage.setItem('rescueroute_token', 'valid-jwt-token');
 

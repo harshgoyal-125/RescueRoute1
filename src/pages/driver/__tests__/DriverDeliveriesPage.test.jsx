@@ -1,5 +1,6 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mockBackend, testDriver, testDelivery } from '../../../test/liveApiFixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
@@ -16,6 +17,9 @@ function renderWithProviders(ui) {
   );
 }
 
+beforeEach(() => { localStorage.setItem('rescueroute_token', 'test-token'); mockBackend({ user: testDriver, deliveries: [testDelivery] }); });
+afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
+
 describe('DriverDeliveriesPage', () => {
   it('renders page header, search bar, and filter buttons', () => {
     renderWithProviders(<DriverDeliveriesPage />);
@@ -28,11 +32,13 @@ describe('DriverDeliveriesPage', () => {
   it('filters deliveries by status button selection', async () => {
     renderWithProviders(<DriverDeliveriesPage />);
 
+    await screen.findByText('Test Donor');
     const deliveredFilterBtn = screen.getByRole('button', { name: /^DELIVERED$/i });
     await userEvent.click(deliveredFilterBtn);
 
-    // Active button background updates and table retains matching records
-    expect(deliveredFilterBtn).toBeInTheDocument();
+    // The only mocked delivery is active, so the delivered filter shows no rows.
+    expect(await screen.findByText(/No deliveries match criteria/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^DELIVERED$/i })).toBeInTheDocument();
   });
 
   it('opens and closes delivery details modal from table row', async () => {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { donationApi } from '../../../services/api/donationApi';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
@@ -47,6 +48,9 @@ describe('CreateDonationPage - Form & Creation Workflow', () => {
   });
 
   it('successfully creates donation and displays confirmation view with dietary badge', async () => {
+    const post = vi.spyOn(donationApi, 'createDonation').mockResolvedValueOnce({
+      _id: '507f1f77bcf86cd799439011', foodName: 'Hearty Vegetable Stew', quantity: 35, unit: 'meals', status: 'POSTED'
+    });
     renderWithProviders(<CreateDonationPage />);
 
     // Select Vegetarian
@@ -65,7 +69,7 @@ describe('CreateDonationPage - Form & Creation Workflow', () => {
     await userEvent.type(locationInput, '77 Market St Kitchen');
 
     const expiryInput = screen.getByLabelText(/Available Until/i);
-    await userEvent.type(expiryInput, '2026-09-24T20:00');
+    await userEvent.type(expiryInput, '2099-09-24T20:00');
 
     const descInput = screen.getByLabelText(/Food Description/i);
     await userEvent.type(descInput, 'Thermal insulated containers, kept at 145F.');
@@ -84,5 +88,6 @@ describe('CreateDonationPage - Form & Creation Workflow', () => {
     expect(await screen.findByText(/Donation Posted Successfully!/i)).toBeInTheDocument();
     expect(screen.getByText(/Hearty Vegetable Stew/i)).toBeInTheDocument();
     expect(screen.getByTestId('dietary-badge')).toHaveTextContent(/Vegetarian/i);
+    post.mockRestore();
   });
 });

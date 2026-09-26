@@ -1,5 +1,6 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mockBackend, testDriver, testDelivery } from '../../../test/liveApiFixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
@@ -16,11 +17,14 @@ function renderWithProviders(ui) {
   );
 }
 
+beforeEach(() => { localStorage.setItem('rescueroute_token', 'test-token'); mockBackend({ user: testDriver, deliveries: [testDelivery] }); });
+afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
+
 describe('DriverDashboardPage', () => {
-  it('renders active delivery route card and details', () => {
+  it('renders active delivery route card and details', async () => {
     renderWithProviders(<DriverDashboardPage />);
 
-    expect(screen.getByTestId('active-delivery-card')).toBeInTheDocument();
+    expect(await screen.findByTestId('active-delivery-card')).toBeInTheDocument();
     expect(screen.getByText(/Current Active Rescue Route/i)).toBeInTheDocument();
     expect(screen.getByText(/1. Pickup Origin/i)).toBeInTheDocument();
     expect(screen.getByText(/2. Shelter Destination/i)).toBeInTheDocument();
@@ -32,7 +36,7 @@ describe('DriverDashboardPage', () => {
     renderWithProviders(<DriverDashboardPage />);
 
     // Initially active delivery DEL-301 is 'DRIVER ASSIGNED'
-    const markPickedUpBtn = screen.getByTestId('mark-picked-up-btn');
+    const markPickedUpBtn = await screen.findByTestId('mark-picked-up-btn');
     expect(markPickedUpBtn).toBeInTheDocument();
 
     await userEvent.click(markPickedUpBtn);
@@ -44,15 +48,14 @@ describe('DriverDashboardPage', () => {
 
     await userEvent.click(markDeliveredBtn);
 
-    // After DEL-301 is delivered, next active delivery DEL-302 becomes active
-    const activeElements = await screen.findAllByText(/Organic Whole Milk & Greek Yogurt/i);
-    expect(activeElements.length).toBeGreaterThan(0);
+    // A completed delivery no longer appears as an active route.
+    expect(await screen.findByText(/All assigned pickups completed/i)).toBeInTheDocument();
   });
 
   it('opens and closes delivery details modal', async () => {
     renderWithProviders(<DriverDashboardPage />);
 
-    const viewBtn = screen.getByTestId('view-delivery-btn');
+    const viewBtn = await screen.findByTestId('view-delivery-btn');
     await userEvent.click(viewBtn);
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
