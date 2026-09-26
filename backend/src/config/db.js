@@ -23,7 +23,7 @@ export async function connectDB(customUri = null) {
     return conn;
   } catch (error) {
     isConnected = false;
-    console.error(`[MongoDB] Connection failed: ${error.message}`);
+    console.error('[MongoDB] Connection failed. Check database connectivity and server logs.');
     throw new Error('Database connection failed. Please ensure MongoDB is running.');
   }
 }
