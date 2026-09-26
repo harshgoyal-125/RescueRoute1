@@ -27,14 +27,12 @@ describe('Role Navigation and Route Handling', () => {
     localStorage.clear();
   });
 
-  it('redirects from root / to /login and displays login screen with custom logo', () => {
+  it('shows the public home page with food request and account links', () => {
     renderAppAtRoute('/');
-    expect(screen.getByText(/Turn surplus food into someone's next meal/i)).toBeInTheDocument();
-    expect(screen.getByTestId('login-submit-btn')).toBeInTheDocument();
-    const logoImg = screen.getByAltText('RescueRoute Logo');
-    expect(logoImg).toBeInTheDocument();
-    expect(logoImg).toHaveAttribute('src');
-    expect(logoImg.getAttribute('src')).toContain('logo');
+    expect(screen.getByRole('heading', { name: /A clearer path from extra food/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Open the food request form/i })).toHaveAttribute('href', '/request-food');
+    expect(screen.getByRole('link', { name: /Join as a donor, shelter or driver/i })).toHaveAttribute('href', '/signup');
+    expect(screen.getByRole('link', { name: /^Sign in$/i })).toHaveAttribute('href', '/login');
   });
 
   it('requires registered credentials to sign in and rejects unregistered account', async () => {

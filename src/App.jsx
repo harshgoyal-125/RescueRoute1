@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
+import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import DonorDashboardPage from './pages/donor/DonorDashboardPage';
 import CreateDonationPage from './pages/donor/CreateDonationPage';
@@ -19,8 +20,8 @@ import NotFoundPage from './pages/NotFoundPage';
 export default function App() {
   return (
     <Routes>
-      {/* Root redirect to login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Public landing page before member access */}
+      <Route path="/" element={<HomePage />} />
 
       {/* Standalone Login Screen */}
       <Route path="/login" element={<LoginPage />} />

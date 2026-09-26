@@ -29,11 +29,11 @@ export async function findMatches(req, res, next) {
       });
     }
 
-    // IDOR protection: A donor can only query matching for their own donation
-    if (req.user.role === 'DONOR' && !donation.donorId.equals(req.user._id)) {
+    // Only the donor who posted this batch or an admin can query its candidates.
+    if (req.user.role !== 'ADMIN' && (req.user.role !== 'DONOR' || !donation.donorId.equals(req.user._id))) {
       return res.status(403).json({
         success: false,
-        message: 'Forbidden: You cannot request matches for another donor\'s listing.'
+        message: 'Forbidden: You cannot request matches for this listing.'
       });
     }
 
@@ -130,10 +130,12 @@ export async function getMatchById(req, res, next) {
       });
     }
 
-    if (req.user.role === 'SHELTER' && !match.shelterId.equals(req.user._id)) {
+    const ownsDonation = req.user.role === 'DONOR' && match.donationId?.donorId?.equals(req.user._id);
+    const isRecipient = req.user.role === 'SHELTER' && match.shelterId.equals(req.user._id);
+    if (req.user.role !== 'ADMIN' && !ownsDonation && !isRecipient) {
       return res.status(403).json({
         success: false,
-        message: 'Forbidden: You cannot access match records for another shelter.'
+        message: 'Forbidden: You cannot access this match record.'
       });
     }
 
