@@ -286,7 +286,7 @@ export default function MatchCard({
 
       {/* Free Interactive Location & Transit Corridor Map */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: showMap ? '0.75rem' : '0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: showMap ? '0.75rem' : '0' }}>
           <Button
             type="button"
             variant="outline"

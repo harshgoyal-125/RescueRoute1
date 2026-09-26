@@ -237,7 +237,7 @@ export default function DriverDeliveriesPage() {
                         <span>{d.date || 'Today'} &bull; {d.deadline}</span>
                       </div>
                     </td>
-                    <td>{d.distanceKm || 3.5} km</td>
+                    <td>{d.distanceKm == null ? 'Unknown' : `${d.distanceKm} km`}</td>
                     <td><StatusBadge status={d.status} /></td>
                     <td>
                       <Button
@@ -344,7 +344,7 @@ export default function DriverDeliveriesPage() {
               </div>
               <div>
                 <span style={{ color: 'var(--slate-500)' }}>Route Distance:</span>
-                <div style={{ fontWeight: 600 }}>{selectedDelivery.distanceKm || 3.5} km (straight-line)</div>
+                <div style={{ fontWeight: 600 }}>{selectedDelivery.distanceKm == null ? 'Unknown' : `${selectedDelivery.distanceKm} km (straight-line)`}</div>
               </div>
             </div>
           </div>

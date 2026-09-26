@@ -1596,3 +1596,27 @@ button, input, select, textarea {
     padding: 1.25rem 1rem;
   }
 }
+
+/* Keep authenticated portal controls within narrow phone viewports. */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0 0.75rem;
+    gap: 0.5rem;
+  }
+  .navbar-left, .navbar-right { min-width: 0; gap: 0.45rem; }
+  .navbar-left > div { min-width: 0; }
+  .navbar-left > div > span:first-child {
+    max-width: 6.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .navbar .role-pill { flex-shrink: 0; }
+  .navbar-right .header-icon-btn { flex-shrink: 0; }
+  .navbar-right > button:last-child { padding: 0.4rem; }
+  .match-card { min-width: 0; }
+}
+
+@media (max-width: 420px) {
+  .navbar-left > div > span:first-child { display: none; }
+}

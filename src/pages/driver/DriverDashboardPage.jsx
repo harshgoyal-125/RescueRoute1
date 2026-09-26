@@ -356,7 +356,7 @@ export default function DriverDashboardPage() {
               <RescueRouteMap
                 markers={driverMarkers}
                 showLine={true}
-                lineLabel={`Rescue transit corridor (${activeDelivery.distanceKm || 3.8} km straight-line)`}
+                lineLabel={activeDelivery.distanceKm == null ? 'Rescue transit corridor (distance unknown)' : `Rescue transit corridor (${activeDelivery.distanceKm} km straight-line)`}
                 height="280px"
                 title="Active Rescue Route Corridor"
                 subtitle="Pickup origin to shelter destination (OpenStreetMap tiles)"
@@ -435,7 +435,7 @@ export default function DriverDashboardPage() {
                     Pickup: <strong>{d.pickup}</strong> &rarr; Shelter: <strong>{d.destination}</strong>
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', marginTop: '0.2rem' }}>
-                    Deadline: {d.deadline} &bull; Distance: {d.distanceKm || 3.5} km
+                    Deadline: {d.deadline} &bull; Distance: {d.distanceKm == null ? 'Unknown' : `${d.distanceKm} km`}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -541,7 +541,7 @@ export default function DriverDashboardPage() {
               </div>
               <div>
                 <span style={{ color: 'var(--slate-500)' }}>Distance:</span>
-                <div style={{ fontWeight: 600 }}>{selectedDelivery.distanceKm || 3.5} km (straight-line)</div>
+                <div style={{ fontWeight: 600 }}>{selectedDelivery.distanceKm == null ? 'Unknown' : `${selectedDelivery.distanceKm} km (straight-line)`}</div>
               </div>
             </div>
           </div>
