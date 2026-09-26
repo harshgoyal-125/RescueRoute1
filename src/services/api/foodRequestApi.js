@@ -9,6 +9,11 @@ export const foodRequestApi = {
     return res.data;
   },
 
+  async trackRequest(trackingId, contactPhone) {
+    const res = await apiClient.post('/requests/track', { trackingId, contactPhone });
+    return res.data;
+  },
+
   /**
    * Get all food requests (Admin, Shelter).
    */
@@ -19,6 +24,11 @@ export const foodRequestApi = {
 
     const queryString = query.toString() ? `?${query.toString()}` : '';
     const res = await apiClient.get(`/requests${queryString}`);
+    return res.data;
+  },
+
+  async getSuggestions(id) {
+    const res = await apiClient.get(`/requests/${id}/suggestions`);
     return res.data;
   },
 

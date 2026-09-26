@@ -22,6 +22,7 @@ import Button from '../../components/common/Button';
 import LoadingState from '../../components/common/LoadingState';
 import RescueRouteMap from '../../components/maps/RescueRouteMap';
 import DietaryBadge from '../../components/common/DietaryBadge';
+import RequestSuggestions from './RequestSuggestions';
 
 export default function ImpactDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -515,6 +516,8 @@ export default function ImpactDashboardPage() {
                           {req.status}
                         </span>
                       </div>
+
+                      <RequestSuggestions requestId={req._id || req.id} />
 
                       {/* Admin Status Actions */}
                       <div style={{ display: 'flex', gap: '0.4rem' }}>

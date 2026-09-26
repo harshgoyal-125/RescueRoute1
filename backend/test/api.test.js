@@ -17,6 +17,7 @@ describe('RescueRoute Backend API Test Suite', () => {
   let createdMatchId;
   let createdDeliveryId;
   let shelterUserId;
+  let adminToken;
 
   beforeAll(async () => {
     // Connect to test database
@@ -36,7 +37,8 @@ describe('RescueRoute Backend API Test Suite', () => {
         name: 'Test Bistro',
         email: 'donor@test.com',
         password: 'password123',
-        role: 'DONOR'
+        role: 'DONOR',
+        location: { type: 'Point', coordinates: [-122.4194, 37.7749] }
       });
     donorToken = donorRes.body.data.token;
 
@@ -48,7 +50,8 @@ describe('RescueRoute Backend API Test Suite', () => {
         email: 'shelter@test.com',
         password: 'password123',
         role: 'SHELTER',
-        capacity: { current: 50, max: 100 }
+        capacity: { current: 50, max: 100 },
+        location: { type: 'Point', coordinates: [-122.4150, 37.7780] }
       });
     shelterToken = shelterRes.body.data.token;
     shelterUserId = shelterRes.body.data.user._id;
@@ -74,6 +77,12 @@ describe('RescueRoute Backend API Test Suite', () => {
         role: 'DONOR'
       });
     anotherDonorToken = otherDonorRes.body.data.token;
+    const admin = await User.create({
+      name: 'Test Admin', email: 'admin@test.com',
+      passwordHash: await User.hashPassword('password123'), role: 'ADMIN'
+    });
+    const { generateToken } = await import('../src/services/authService.js');
+    adminToken = generateToken(admin);
   });
 
   afterAll(async () => {
@@ -163,7 +172,8 @@ describe('RescueRoute Backend API Test Suite', () => {
           pickupLocation: '123 Market St',
           availableUntil: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
           description: 'Sealed containers at safe holding temp',
-          contactInfo: 'Chef Mike (555) 123-4567'
+          contactInfo: 'Chef Mike (555) 123-4567',
+          location: { type: 'Point', coordinates: [-122.4194, 37.7749] }
         });
 
       expect(res.status).toBe(201);
@@ -262,8 +272,13 @@ describe('RescueRoute Backend API Test Suite', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.delivery).toBeDefined();
-      expect(res.body.data.delivery.status).toBe('DRIVER_ASSIGNED');
+      expect(res.body.data.delivery.status).toBe('MATCHED');
       createdDeliveryId = res.body.data.delivery._id;
+      const claim = await request(app)
+        .post(`/api/deliveries/${createdDeliveryId}/assign`)
+        .set('Authorization', `Bearer ${driverToken}`);
+      expect(claim.status).toBe(200);
+      expect(claim.body.data.delivery.status).toBe('DRIVER_ASSIGNED');
     });
   });
 
@@ -343,12 +358,12 @@ describe('RescueRoute Backend API Test Suite', () => {
   // 7. Impact Dashboard API
   describe('Impact Dashboard API', () => {
     it('GET /api/dashboard/impact returns city-wide aggregated metrics', async () => {
-      const res = await request(app).get('/api/dashboard/impact');
+      const res = await request(app).get('/api/dashboard/impact').set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.metrics.totalMealsRescued).toBeGreaterThan(0);
-      expect(res.body.data.metrics.co2eAvoidedKg).toBeGreaterThan(0);
+      expect(res.body.data.metrics.co2eAvoidedKg).toBeNull();
       expect(Array.isArray(res.body.data.categoryDistribution)).toBe(true);
       expect(Array.isArray(res.body.data.activityTimeline)).toBe(true);
     });

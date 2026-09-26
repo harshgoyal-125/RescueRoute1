@@ -1,4 +1,5 @@
 import { FoodRequest } from '../models/FoodRequest.js';
+import { suggestionsForRequest } from '../services/requestSuggestions.js';
 
 /**
  * Public endpoint to submit a food request (no authentication required).
@@ -72,7 +73,7 @@ export async function createPublicRequest(req, res, next) {
 /**
  * Get all food requests with optional status and urgency filters.
  * GET /api/requests
- * Access: ADMIN, SHELTER
+ * Access: ADMIN
  */
 export async function getAllRequests(req, res, next) {
   try {
@@ -134,6 +135,44 @@ export async function updateRequestStatus(req, res, next) {
       success: true,
       message: `Request status updated to ${status.toUpperCase()}.`,
       data: updated
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Public lookup reveals only the request's actual workflow status, never contact or address. */
+export async function trackPublicRequest(req, res, next) {
+  try {
+    const id = String(req.body?.trackingId || '').trim();
+    const phone = String(req.body?.contactPhone || '').replace(/\D/g, '');
+    if (!/^[0-9a-f]{24}$/i.test(id) || phone.length < 7 || phone.length > 15) {
+      return res.status(400).json({ success: false, message: 'Enter a valid tracking ID and phone number.' });
+    }
+
+    const record = await FoodRequest.findById(id).select('contactPhone status').lean();
+    const savedPhone = String(record?.contactPhone || '').replace(/\D/g, '');
+    const samePhone = savedPhone === phone || (phone.length === savedPhone.length + 1 && phone.startsWith('1') && phone.slice(1) === savedPhone) || (savedPhone.length === phone.length + 1 && savedPhone.startsWith('1') && savedPhone.slice(1) === phone);
+    // Never say which factor failed; keep the output free of requester details.
+    if (!record || !samePhone) {
+      return res.status(404).json({ success: false, message: 'Request not found for that ID and phone number.' });
+    }
+
+    return res.status(200).json({ success: true, data: { status: record.status } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Admin-only read of current nearby, compatible donated food. Suggestions are not allocations. */
+export async function getRequestSuggestions(req, res, next) {
+  try {
+    const foodRequest = await FoodRequest.findById(req.params.id).lean();
+    if (!foodRequest) return res.status(404).json({ success: false, message: 'Food request not found.' });
+    const suggestions = await suggestionsForRequest(foodRequest);
+    return res.status(200).json({
+      success: true,
+      data: { suggestions, reserved: false, note: 'Suggestions only. No donation or delivery is assigned.' }
     });
   } catch (error) {
     next(error);

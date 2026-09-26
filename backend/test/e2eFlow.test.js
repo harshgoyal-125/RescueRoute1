@@ -151,7 +151,8 @@ describe('RescueRoute Complete End-to-End Production Verification Flow', () => {
         pickupLocation: '100 Market St, Back Kitchen Dock',
         availableUntil: new Date(Date.now() + 6 * 3600 * 1000).toISOString(),
         description: 'Warm vegetarian lasagna trays packaged in thermal food carriers.',
-        contactInfo: 'Marcus V. (555) 123-4567 E2E_PROD'
+        contactInfo: 'Marcus V. (555) 123-4567 E2E_PROD',
+        location: { type: 'Point', coordinates: [-122.4194, 37.7749] }
       });
 
     expect(createRes.status).toBe(201);
@@ -190,15 +191,15 @@ describe('RescueRoute Complete End-to-End Production Verification Flow', () => {
     createdDeliveryId = acceptRes.body.data.delivery._id;
   });
 
-  it('Step 5: Driver Claims Delivery Route', async () => {
-    const claimRes = await request(app)
-      .post(`/api/deliveries/${createdDeliveryId}/assign`)
+  it('Step 5: Driver Receives Assigned Delivery Route', async () => {
+    const deliveryRes = await request(app)
+      .get(`/api/deliveries/${createdDeliveryId}`)
       .set('Authorization', `Bearer ${driverToken}`);
 
-    expect(claimRes.status).toBe(200);
-    expect(claimRes.body.success).toBe(true);
-    expect(claimRes.body.data.delivery.status).toBe('DRIVER_ASSIGNED');
-    expect(claimRes.body.data.delivery.driverName).toBe('Dave Courier');
+    expect(deliveryRes.status).toBe(200);
+    expect(deliveryRes.body.data.delivery.status).toBe('DRIVER_ASSIGNED');
+    expect(deliveryRes.body.data.delivery.driverId.toString()).toBe(driverUser._id.toString());
+    expect(deliveryRes.body.data.delivery.driverName).toBe('Dave Courier');
   });
 
   it('Step 6: Driver Picks Up and Marks Delivered', async () => {
@@ -254,13 +255,13 @@ describe('RescueRoute Complete End-to-End Production Verification Flow', () => {
   });
 
   it('Step 8: Impact Dashboard Reflects Real Verified Metrics', async () => {
-    const impactRes = await request(app).get('/api/dashboard/impact');
+    const impactRes = await request(app).get('/api/dashboard/impact').set('Authorization', `Bearer ${adminToken}`);
 
     expect(impactRes.status).toBe(200);
     expect(impactRes.body.success).toBe(true);
     expect(impactRes.body.data.metrics.completedDeliveries).toBeGreaterThanOrEqual(1);
     expect(impactRes.body.data.metrics.totalMealsRescued).toBeGreaterThanOrEqual(30);
-    expect(impactRes.body.data.metrics.co2eAvoidedKg).toBeGreaterThan(0);
+    expect(impactRes.body.data.metrics.co2eAvoidedKg).toBeNull();
     expect(Array.isArray(impactRes.body.data.networkMarkers)).toBe(true);
   });
 });

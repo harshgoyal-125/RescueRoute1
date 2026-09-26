@@ -33,6 +33,13 @@ describe('Role Navigation and Route Handling', () => {
     expect(screen.getByRole('link', { name: /Open the food request form/i })).toHaveAttribute('href', '/request-food');
     expect(screen.getByRole('link', { name: /Join as a donor, shelter or driver/i })).toHaveAttribute('href', '/signup');
     expect(screen.getByRole('link', { name: /^Sign in$/i })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('link', { name: /Track request/i })).toHaveAttribute('href', '/track-request');
+  });
+
+  it('shows public tracking form without a login', () => {
+    renderAppAtRoute('/track-request');
+    expect(screen.getByRole('heading', { name: /Track your food request/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Check status/i })).toBeInTheDocument();
   });
 
   it('requires registered credentials to sign in and rejects unregistered account', async () => {

@@ -4,6 +4,7 @@ import app from '../src/app.js';
 import { connectDB, disconnectDB } from '../src/config/db.js';
 import { User } from '../src/models/User.js';
 import { FoodRequest } from '../src/models/FoodRequest.js';
+import { Donation } from '../src/models/Donation.js';
 import { generateToken } from '../src/services/authService.js';
 
 describe('Public Food Request & Admin Management API Test Suite', () => {
@@ -115,14 +116,12 @@ describe('Public Food Request & Admin Management API Test Suite', () => {
     expect(res.status).toBe(403);
   });
 
-  it('5. Shelter can view food requests list', async () => {
+  it('5. Shelter cannot view private requester details', async () => {
     const res = await request(app)
       .get('/api/requests')
       .set('Authorization', `Bearer ${shelterToken}`);
 
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.status).toBe(403);
   });
 
   it('6. Admin can view food requests list', async () => {
@@ -152,6 +151,65 @@ describe('Public Food Request & Admin Management API Test Suite', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.status).toBe('APPROVED');
+  });
+
+
+  it('tracks status with full ID and matching phone, without disclosing private details', async () => {
+    const res = await request(app).post('/api/requests/track').send({
+      trackingId: createdRequestId, contactPhone: '+1 (555) 333-4444'
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ status: 'APPROVED' });
+    expect(JSON.stringify(res.body)).not.toContain('outreach@foodreqtest.com');
+    expect(JSON.stringify(res.body)).not.toContain('100 Main St');
+  });
+
+  it('does not reveal whether a tracking ID or a phone is wrong', async () => {
+    const wrongPhone = await request(app).post('/api/requests/track').send({
+      trackingId: createdRequestId, contactPhone: '555-333-9999'
+    });
+    const absentId = await request(app).post('/api/requests/track').send({
+      trackingId: '507f1f77bcf86cd799439011', contactPhone: '(555) 333-4444'
+    });
+    expect(wrongPhone.status).toBe(404);
+    expect(absentId.status).toBe(404);
+    expect(wrongPhone.body).toEqual(absentId.body);
+  });
+
+  it('rejects malformed or injected tracking IDs', async () => {
+    const res = await request(app).post('/api/requests/track').send({
+      trackingId: { $ne: null }, contactPhone: '(555) 333-4444'
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('admin sees only compatible nearby, available suggestions; nothing is reserved', async () => {
+    const posted = await Donation.create({
+      donorId: donorUser._id, donorName: donorUser.name, foodType: 'Prepared Meals',
+      dietaryType: 'Vegetarian', foodName: 'Test hot meals', quantity: 50, unit: 'meals',
+      pickupLocation: 'Near request', availableUntil: new Date(Date.now() + 3600000),
+      description: 'Stored safely', contactInfo: 'FOOD_REQ_SUGGESTION', status: 'POSTED',
+      location: { type: 'Point', coordinates: [-122.411, 37.781] }
+    });
+    const far = await Donation.create({
+      donorId: donorUser._id, donorName: donorUser.name, foodType: 'Prepared Meals',
+      dietaryType: 'Vegetarian', foodName: 'Far away', quantity: 50, unit: 'meals',
+      pickupLocation: 'Far request', availableUntil: new Date(Date.now() + 3600000),
+      description: 'Stored safely', contactInfo: 'FOOD_REQ_SUGGESTION', status: 'POSTED',
+      location: { type: 'Point', coordinates: [-121.0, 38.5] }
+    });
+    const url = `/api/requests/${createdRequestId}/suggestions`;
+    const unauth = await request(app).get(url);
+    const shelter = await request(app).get(url).set('Authorization', `Bearer ${shelterToken}`);
+    const admin = await request(app).get(url).set('Authorization', `Bearer ${adminToken}`);
+    expect(unauth.status).toBe(401);
+    expect(shelter.status).toBe(403);
+    expect(admin.status).toBe(200);
+    expect(admin.body.data.reserved).toBe(false);
+    expect(admin.body.data.suggestions.map(item => item.donationId)).toContain(posted._id.toString());
+    expect(admin.body.data.suggestions.map(item => item.donationId)).not.toContain(far._id.toString());
+    expect((await Donation.findById(posted._id)).status).toBe('POSTED');
+    await Donation.deleteMany({ contactInfo: 'FOOD_REQ_SUGGESTION' });
   });
 
   it('9. Rejects update with invalid status string', async () => {

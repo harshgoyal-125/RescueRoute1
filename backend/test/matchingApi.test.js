@@ -281,11 +281,11 @@ describe('TASK 03 - Matching Engine API & Security Test Suite', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.match.status).toBe('ACCEPTED');
       expect(res.body.data.delivery).toBeDefined();
-      expect(res.body.data.delivery.status).toBe('DRIVER_ASSIGNED');
+      expect(res.body.data.delivery.status).toBe('MATCHED');
 
-      // Verify donation in DB was updated to DRIVER_ASSIGNED
+      // No driver was selected without an available, eligible location match.
       const updatedDonation = await Donation.findById(activeDonation._id);
-      expect(updatedDonation.status).toBe('DRIVER_ASSIGNED');
+      expect(updatedDonation.status).toBe('MATCHED');
       expect(updatedDonation.matchedShelterId.toString()).toBe(shelterUserA._id.toString());
     });
 

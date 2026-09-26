@@ -141,9 +141,9 @@ export default function PublicFoodRequestPage() {
           <Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid var(--slate-100)' }}>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--slate-500)' }}>Tracking ID</span>
-                <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--slate-900)' }}>
-                  REQ-{submittedData._id ? submittedData._id.toString().slice(-6).toUpperCase() : 'SUBMITTED'}
+                <span style={{ fontSize: '0.8125rem', color: 'var(--slate-500)' }}>Tracking ID - save this to check your request</span>
+                <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--slate-900)', overflowWrap: 'anywhere', textAlign: 'right' }}>
+                  {submittedData._id || 'Unavailable'}
                 </span>
               </div>
 
@@ -199,9 +199,9 @@ export default function PublicFoodRequestPage() {
               <Button
                 variant="primary"
                 style={{ flex: 1 }}
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/track-request')}
               >
-                Return to Home
+                Track Request
               </Button>
             </div>
           </Card>

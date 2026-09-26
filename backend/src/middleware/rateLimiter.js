@@ -37,3 +37,12 @@ export const aiLimiter = rateLimit({
   }
 });
 
+
+// Narrow public request lookups: a tracking ID and phone are both required.
+export const requestTrackingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many tracking attempts. Please try again later.' }
+});

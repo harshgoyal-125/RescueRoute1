@@ -15,6 +15,7 @@ import DriverDashboardPage from './pages/driver/DriverDashboardPage';
 import DriverDeliveriesPage from './pages/driver/DriverDeliveriesPage';
 import ImpactDashboardPage from './pages/impact/ImpactDashboardPage';
 import PublicFoodRequestPage from './pages/public/PublicFoodRequestPage';
+import TrackRequestPage from './pages/public/TrackRequestPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
 
       {/* Standalone Public Food Request Form */}
       <Route path="/request-food" element={<PublicFoodRequestPage />} />
+      <Route path="/track-request" element={<TrackRequestPage />} />
 
       {/* Application Shell with Shared Layout & Protected Portals */}
       <Route element={<Layout />}>

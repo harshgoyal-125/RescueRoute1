@@ -21,6 +21,7 @@ export default function HomePage() {
           </Link>
           <nav aria-label="Main navigation" className="home-nav-links">
             <Link to="/request-food">Request food</Link>
+            <Link to="/track-request">Track request</Link>
             <Link to="/login">Sign in</Link>
             <Link className="home-nav-signup" to="/signup">Join the network</Link>
           </nav>
