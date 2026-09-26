@@ -130,19 +130,18 @@ export async function assignDelivery(req, res, next) {
       });
     }
 
-    // Terminal states cannot be assigned
-    if (delivery.status !== 'MATCHED' && !(delivery.status === 'DRIVER_ASSIGNED' && !delivery.driverId)) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot assign a delivery with terminal status '${delivery.status}'.`
-      });
-    }
-
-    // If already assigned to someone else
+    // Report a conflicting claim before the terminal-state check, including after pickup.
     if (delivery.driverId && !delivery.driverId.equals(req.user._id)) {
       return res.status(409).json({
         success: false,
         message: 'This delivery has already been assigned to another volunteer driver.'
+      });
+    }
+
+    if (delivery.status !== 'MATCHED' && !(delivery.status === 'DRIVER_ASSIGNED' && !delivery.driverId)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot assign a delivery with status '${delivery.status}'.`
       });
     }
 
